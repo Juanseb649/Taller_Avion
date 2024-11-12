@@ -3,27 +3,27 @@ __License__="GPL"
 __Version__="1.0.0"
 __Email__="juan.ibarrasalas@campusucc.edu.co"
 
-from Silla  import silla
+from Silla import silla
 from Silla import clase
 from Silla import ubicacion
 from Pasajero import Pasajero
 
 class Avion:
-    #constructor
+    # Constructor
     def __init__(self):
         self.numeroSillasEjecutivas = 8
         self.numeroSillasEconomicas = 42
         self.__sillaEjecutiva = []
         self.__sillaEconomica = []
 
-        #sillas ejecutivas
+        # Sillas ejecutivas
         for i in range(self.numeroSillasEjecutivas):
             if i % 2 == 1:
                 self.__sillaEjecutiva.append(silla(i + 1, clase.SillaEjecutiva, ubicacion.Pasillo))
             else:
                 self.__sillaEjecutiva.append(silla(i + 1, clase.SillaEjecutiva, ubicacion.Ventana))
 
-        #sillas economicas
+        # Sillas económicas
         for i in range(self.numeroSillasEconomicas):
             if i % 3 == 1:
                 self.__sillaEconomica.append(silla(i + 1, clase.Economica, ubicacion.Centro))
@@ -32,9 +32,10 @@ class Avion:
             else:
                 self.__sillaEconomica.append(silla(i + 1, clase.Economica, ubicacion.Ventana))
 
-    #metodos
+    # Métodos
+
     def asignarSilla(self, silla, pasajero, clase, ubicacion, nombre: str, cedula: int) -> silla:
-        #valores
+        # Validación de valores
         if clase != clase.Ejecutiva and clase != clase.Economica:
             raise Exception("Clase no reconocida")
         if ubicacion != ubicacion.Centro and ubicacion != ubicacion.Pasillo and ubicacion != ubicacion.Ventana:
@@ -42,10 +43,10 @@ class Avion:
         if cedula == 0 or cedula is None:
             raise Exception("Cedula no reconocida")
 
-        #Pasajero
+        # Crear pasajero
         pasajero = Pasajero(cedula, nombre)
 
-        #Asignar silla ejecutiva
+        # Asignar silla ejecutiva
         if clase == clase.Ejecutiva:
             for silla in self.__sillaEjecutiva:
                 if not silla.sillaAsignada() and silla.darUbicacion() == ubicacion:
@@ -53,64 +54,27 @@ class Avion:
                     return silla
             raise Exception("No hay sillas de la clase ejecutiva")
 
-        #Asignar silla economica
+        # Asignar silla económica
         elif clase == clase.Economica:
             for silla in self.__sillaEconomica:
                 if not silla.sillaAsignada() and silla.darUbicacion() == ubicacion:
                     silla.asignarPasajero(pasajero)
                     return silla
-            raise Exception("No hay sillas de la clase economica")
+            raise Exception("No hay sillas de la clase económica")
         
-        #Manejar error
-        else:
-            raise Exception("Error en la asignacion de la silla")
+        raise Exception("Error en la asignación de la silla")
 
     def buscarPasajero(self, cedula: int) -> silla:
-        #Validar valores
+        # Validar valores
         if cedula == 0 or cedula is None:
             raise Exception("Cedula no reconocida")
 
-        #Buscar en sillas ejecutivas
+        # Buscar en sillas ejecutivas
         for silla in self.__sillaEjecutiva:
             if silla.sillaAsignada() and silla.darPasajero().darCedula() == cedula:
                 return silla
 
-        #Buscar en sillas economicas
+        # Buscar en sillas económicas
         for silla in self.__sillaEconomica:
             if silla.sillaAsignada() and silla.darPasajero().darCedula() == cedula:
                 return silla
-
-        #Manejar error
-        raise Exception("No se encontro al pasajero")
-    
-    def eliminarReserva(self, cedula: int) -> None:
-        #Validar valores
-        if cedula == 0 or cedula is None:
-            raise Exception("Cedula no reconocida")
-
-        #Buscar pasajero
-        try:
-            silla = self.buscarPasajero(cedula)
-            silla.desAsignarPasajero()
-            
-            #Eliminar silla
-            if silla.darClase() == clase.Ejecutiva:
-                self.__sillaEjecutiva.remove(silla)
-            elif silla.darClase() == clase.Economica:
-                self.__sillaEconomica.remove(silla)
-        except Exception:
-            raise Exception("No se encontro al pasajero")
-
-    def calcularPorcentajeOcupacion(self) -> float:
-        totalSillasOcupadas = 0
-        
-        for silla in self.__sillaEjecutiva:
-            if silla.sillaAsignada():
-                totalSillasOcupadas += 1
-                
-        for silla in self.__sillaEconomica:
-            if silla.sillaAsignada():
-                totalSillasOcupadas += 1
-                
-        totalSillas = self.numeroSillasEjecutivas + self.numeroSillasEconomicas
-        return (totalSillasOcupadas / totalSillas) * 100
